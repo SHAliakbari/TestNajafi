@@ -1,0 +1,138 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+
+}
+
+<style>
+    span.inputLabel {
+        display: inline-block;
+        width: 150px;
+    }
+</style>
+
+<link rel="stylesheet" href="~/js/intl-tel-input/css/intlTelInput.min.css">
+<script src="~/js/intl-tel-input/js/intlTelInput.min.js"></script>
+
+<div>
+    <br />
+    <div>
+        <input type="hidden" id="id" value="@Model.Id" />
+        <div class="inputItem">
+            <span class="inputLabel">First Name :</span>
+            <input type="text" id="firstName" value="@Model.FirstName" />
+        </div>
+        <div class="inputItem">
+            <span class="inputLabel">Last Name :</span>
+            <input type="text" id="lastName" value="@Model.LastName" />
+        </div>
+        <div class="inputItem">
+            <span class="inputLabel">Date Of Birth :</span>
+            <input type="date" id="dateOfBirth" value="@Model.DateOfBirth.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="inputItem">
+            <span class="inputLabel">Phone Number :</span>
+            <input type="tel" id="phoneNumber" value="@Model.PhoneNumber" />
+            <span style="color:red;" id="phoneError"></span>
+        </div>
+        <div class="inputItem">
+            <span class="inputLabel">Email :</span>
+            <input type="text" id="email" value="@Model.Email" />
+        </div>
+        <div class="inputItem">
+            <span class="inputLabel">Bank Account Number :</span>
+            <input type="text" id="bankAccountNumber" value="@Model.BankAccountNumber" />
+        </div>
+        <button type="button" onclick="submitForm()">@(Model.Id == 0 ? "Add" : "Edit")</button>
+        <span style="color:red;" id="error"></span>
+    </div>
+</div>
+<script type="text/javascript">
+
+    var input = document.querySelector("#phoneNumber");
+    var iti = window.intlTelInput(input, {
+        // allowDropdown: false,
+        // autoHideDialCode: false,
+        // autoPlaceholder: "off",
+        dropdownContainer: document.body,
+        // excludeCountries: ["us"],
+        // formatOnDisplay: false,
+        // geoIpLookup: function(callback) {
+        //   $.get("http://ipinfo.io", function() {}, "jsonp").always(function(resp) {
+        //     var countryCode = (resp && resp.country) ? resp.country : "";
+        //     callback(countryCode);
+        //   });
+        // },
+        // hiddenInput: "full_number",
+        // initialCountry: "auto",
+        // localizedCountries: { 'de': 'Deutschland' },
+        // nationalMode: false,
+        // onlyCountries: ['us', 'gb', 'ch', 'ca', 'do'],
+        // placeholderNumberType: "MOBILE",
+        // preferredCountries: ['cn', 'jp'],
+        // separateDialCode: true,
+        utilsScript: "/js/intl-tel-input/js/utils.js",
+    });
+
+    function submitForm() {
+        document.querySelector("#phoneError").innerHTML = "";
+        var numberType = iti.getNumberType();
+        if (numberType != intlTelInputUtils.numberType.MOBILE) {
+            var error = iti.getValidationError();
+            document.querySelector("#phoneError").innerHTML = "Mobile not valid";
+            return;
+        }
+
+        var countryData = iti.getSelectedCountryData();
+
+        var data = {
+            id: document.querySelector("#id").value,
+            firstName: document.querySelector("#firstName").value,
+            lastName: document.querySelector("#lastName").value,
+            dateOfBirth: document.querySelector("#dateOfBirth").value,
+            country: countryData.iso2,
+            phoneNumber: document.querySelector("#phoneNumber").value,
+            email: document.querySelector("#email").value,
+            bankAccountNumber: document.querySelector("#bankAccountNumber").value
+        };
+
+        if (!data.firstName) {
+            alert("First Name is required");
+        }
+        if (!data.lastName) {
+            alert("Last Name is required");
+        }
+        if (!data.dateOfBirth) {
+            alert("Date Of Birth is required");
+        }
+        if (!data.email) {
+            alert("Email is required");
+        }
+        if (!data.bankAccountNumber) {
+            alert("Bank Account Number is required");
+        }
+
+
+
+        const url = '/Home/Index';
+        const oParams = {
+            headers: {
+                "content-type": "application/json;charset=UTF-8"
+            },
+            body: JSON.stringify(data),
+            method: "POST"
+        }
+
+        fetch(url, oParams)
+            .then(function (response) {
+                if (response.status == 200)
+                    window.location = "List";
+                if (response)
+                    return response.text();
+            })
+            .then(error => {
+                console.log(error)
+                document.querySelector("#error").innerHTML = error;
+            });
+
+    }
+</script>

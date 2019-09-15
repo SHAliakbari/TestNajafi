@@ -1,0 +1,73 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+
+}
+
+<style>
+    .myGrid {
+        width: 100%;
+    }
+
+        .myGrid td {
+            border: 1px solid gray;
+            padding: 1px;
+        }
+</style>
+
+<div>
+    <br />
+    <a href="/Home/Index">Add New</a>
+    <table class="myGrid">
+        <thead>
+            <tr>
+                <td>First Name</td>
+                <td>Last Name</td>
+                <td>DateOfBirth</td>
+                <td>PhoneNumber</td>
+                <td>Email</td>
+                <td>BankAccountNumber</td>
+                <td></td>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Count; i++)
+            {
+                <tr>
+                    <td>@Model[i].FirstName</td>
+                    <td>@Model[i].LastName</td>
+                    <td>@Model[i].DateOfBirth</td>
+                    <td>@Model[i].PhoneNumber</td>
+                    <td>@Model[i].Email</td>
+                    <td>@Model[i].BankAccountNumber</td>
+                    <td>
+                        <a href="/Home/Index?id=@Model[i].Id">Edit</a>
+                        <a href="" onclick="deleteItem(event, @Model[i].Id)">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<script type="text/javascript">
+    function deleteItem(e, id) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (confirm("Are you sure to delete selected item ?")) {
+            const url = '/Home/Delete?id=' + id.toString();
+            const oParams = {
+                headers: {
+                    "content-type": "application/json;charset=UTF-8"
+                },
+                method: "POST"
+            }
+
+            fetch(url, oParams)
+                .then(res => {
+                    if (res.status == 200)
+                        window.location.reload();
+                })
+                .then(error => console.log(error));
+        }
+    }
+</script>
